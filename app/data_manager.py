@@ -5,8 +5,27 @@ from PyQt6.QtCore import Qt
 
 class TaskManager:
     def __init__(self, filename="tasks.json"):
-        self.filename = filename
-        self.data = self.load_data() # 结构变更为整个字典，不再只是tasks
+        # 1. 获取当前系统用户的家目录 
+        # (Windows下通常是 C:\Users\你的用户名, Linux/Mac下是 /home/你的用户名)
+        user_home = os.path.expanduser("~")
+        
+        # 2. 定义一个专门存放你应用数据的文件夹名称，尽量独特一点
+        app_data_dir = os.path.join(user_home, ".calendar_app_data")
+        
+        # 3. 检查文件夹是否存在，不存在则创建
+        if not os.path.exists(app_data_dir):
+            try:
+                os.makedirs(app_data_dir)
+            except OSError as e:
+                print(f"Error creating directory: {e}")
+                # 如果创建失败，回退到当前目录
+                app_data_dir = "."
+
+        # 4. 拼接完整的绝对路径
+        self.filename = os.path.join(app_data_dir, filename)
+
+
+        self.data = self.load_data()
 
     def load_data(self):
         if os.path.exists(self.filename):
